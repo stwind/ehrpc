@@ -23,12 +23,12 @@ new(Type, MFA) ->
     Req = #req{type = Type, mfa = MFA},
     set_meta(start_time, os:timestamp(), Req).
 
-mfa(#req{mfa = MFA}) ->
-    MFA.
+mfa(#req{mfa = {M, F, A}, type = Type}) ->
+    {Type, M, F, A}.
 
 reply(Reply, Req) ->
     Req1 = set_meta(end_time, os:timestamp(), Req),
-    Req1#req{resp = zerpc_proto:encode(Reply)}.
+    Req1#req{resp = ehrpc_proto:encode(Reply)}.
 
 meta(Key, Req) ->
     meta(Key, Req, undefined).

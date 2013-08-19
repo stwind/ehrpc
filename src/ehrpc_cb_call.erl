@@ -47,8 +47,12 @@ content_types_accepted(Req, Ctx) ->
     {[{'*', from_bert}], Req, Ctx}.
 
 from_bert(Req, #ctx{req = RpcReq, middlewares = Middlewares} = Ctx) ->
-    RpcReq1 = run_middlewares(RpcReq, Middlewares),
-    {true, reply(RpcReq1, Req), Ctx}.
+    case run_middlewares(RpcReq, Middlewares) of
+        {ok, RpcReq1} ->
+            {true, reply(RpcReq1, Req), Ctx};
+        {error, Reason} ->
+            {halt, err_body(Reason, Req), Ctx}
+    end.
 
 %% ===================================================================
 %% Callbacks
@@ -59,15 +63,15 @@ err_body(Reason, Req) ->
     cowboy_req:set_resp_body(Body, Req).
 
 reply(RpcReq, Req) ->
-    Body = ehrpc_proto:encode(ehrpc_proto:reply(ehrpc_req:resp(RpcReq))),
+    Body = ehrpc_req:resp(RpcReq),
     cowboy_req:set_resp_body(Body, Req).
 
 run_middlewares(Req, [Mod | Rest]) ->
     case Mod:execute(Req) of
         {ok, Req1} ->
             run_middlewares(Req1, Rest);
-        {error, _Reason} ->
-            nop
+        {error, Reason} ->
+            {error, Reason}
     end;
-run_middlewares(_, []) ->
-    ok.
+run_middlewares(Req, []) ->
+    {ok, Req}.

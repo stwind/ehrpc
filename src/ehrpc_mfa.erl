@@ -9,8 +9,8 @@
 %% ===================================================================
 
 execute(Req) ->
-    {Body, Req1} = zerpc_req:body(Req),
-    Req2 = zerpc_req:reply(handle(Body), Req1),
+    MFA = ehrpc_req:mfa(Req),
+    Req2 = ehrpc_req:reply(handle(MFA), Req),
     {ok, Req2}.
 
 %% ===================================================================
@@ -24,18 +24,18 @@ handle({call, Mod, Fun, Args}) ->
         {error, Error} ->
             error_reply({throw, Error}, []);
         Result ->
-            zerpc_proto:reply(Result)
+            ehrpc_proto:reply(Result)
     end;
 handle({cast, Mod, Fun, Args}) ->
     proc_lib:spawn(Mod, Fun, Args),
-    zerpc_proto:noreply().
+    ehrpc_proto:noreply().
 
 error_reply(Error, BackTrace) when is_list(BackTrace) ->
     {Code, Type, Reason} = explain(Error),
-    zerpc_proto:error({server, Code, Type, Reason, BackTrace});
+    ehrpc_proto:error({server, Code, Type, Reason, BackTrace});
 error_reply(Type, Reason) ->
     {Code, _, Reason1} = explain(Reason),
-    zerpc_proto:error({server, Code, type(Type), Reason1, []}).
+    ehrpc_proto:error({server, Code, type(Type), Reason1, []}).
 
 type(Type) when is_tuple(Type) ->
     element(1, Type);

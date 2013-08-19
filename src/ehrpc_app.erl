@@ -5,6 +5,8 @@
 %% Application callbacks
 -export([start/2, stop/1]).
 
+-include_lib("eunit/include/eunit.hrl").
+
 %% ===================================================================
 %% Application callbacks
 %% ===================================================================
@@ -22,20 +24,25 @@ stop(_State) ->
 %% ===================================================================
 
 setup_cowboy() ->
-    NbAcceptors = ehrpc_util:get_env({server, size}, 100),
-    {ok, _} = cowboy:start_http(ehrpc, NbAcceptors, trans_opts(), proto_opts()).
+    case ehrpc_util:get_env(server) of
+        undefined ->
+            nop;
+        _ ->
+            NbAcceptors = ehrpc_util:get_env({server, size}, 100),
+            {ok, _} = cowboy:start_http(ehrpc, NbAcceptors, trans_opts(), proto_opts())
+    end.
 
 trans_opts() ->
-    {ok, Ip} = inet_parse:address(ehrpc_util:get_env(ip, "0.0.0.0")),
+    {ok, Ip} = inet_parse:address(ehrpc_util:get_env({server, host}, "0.0.0.0")),
     [
-        {port, ehrpc_util:get_env(port, 5566)},
+        {port, ehrpc_util:get_env({server, port}, 5566)},
         {ip, Ip}, 
-        {max_connections, ehrpc_util:get_env(max_connections, 1024)}, 
-        {backlog, ehrpc_util:get_env(backlog, 1024)}
+        {max_connections, ehrpc_util:get_env({server, max_connections}, 1024)}, 
+        {backlog, ehrpc_util:get_env({server, backlog}, 1024)}
     ].
 
 proto_opts() ->
-    DispatchFile = ehrpc_util:get_env(dispatch_file, "priv/dispatch.script"),
+    DispatchFile = ehrpc_util:get_env({server, dispatch_file}, "priv/dispatch.script"),
     {ok, Dispatch} = file:script(DispatchFile, bs()),
     [{env, [{dispatch, cowboy_router:compile(Dispatch)}]}].
 

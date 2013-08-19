@@ -30,8 +30,7 @@ call(Service, Mod, Fun, Args, Timeout) ->
 %% ===================================================================
 
 url(Service) ->
-    Url = ehrpc_util:get_env({client, services, Service, url}),
-    Url ++ "/call".
+    ehrpc_util:get_env({client, services, Service, url},"http://localhost:5566").
 
 reason({server, _, Type, undefined, _}) ->
     Type;
