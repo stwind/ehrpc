@@ -21,7 +21,7 @@ init({_, http}, _Req, _Opts) ->
     {upgrade, protocol, cowboy_rest}.
 
 rest_init(Req, _) ->
-    {ok, Middlewares} = ehrpc_util:get_env(server, middlewares),
+    Middlewares = ehrpc_util:get_env({server, middlewares}),
     {ok, Req, #ctx{middlewares = Middlewares}}.
 
 service_available(Req, Ctx) ->
@@ -48,7 +48,7 @@ content_types_accepted(Req, Ctx) ->
 
 from_bert(Req, #ctx{req = RpcReq, middlewares = Middlewares} = Ctx) ->
     RpcReq1 = run_middlewares(RpcReq, Middlewares),
-    {reply(RpcReq1), Req, Ctx}.
+    {true, reply(RpcReq1, Req), Ctx}.
 
 %% ===================================================================
 %% Callbacks
@@ -58,8 +58,9 @@ err_body(Reason, Req) ->
     Body = ehrpc_proto:encode(ehrpc_proto:error(Reason)),
     cowboy_req:set_resp_body(Body, Req).
 
-reply(Req) ->
-    ehrpc_proto:encode(ehrpc_proto:reply(ehrpc_req:resp(Req))).
+reply(RpcReq, Req) ->
+    Body = ehrpc_proto:encode(ehrpc_proto:reply(ehrpc_req:resp(RpcReq))),
+    cowboy_req:set_resp_body(Body, Req).
 
 run_middlewares(Req, [Mod | Rest]) ->
     case Mod:execute(Req) of

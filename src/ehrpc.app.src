@@ -2,12 +2,15 @@
 %% ex: ft=erlang ts=2 sw=2 et
 {application, ehrpc,
   [
-    {description, "erlang http rpc"},
+    {description, "Erlang HTTP RPC"},
     {vsn, "0.0.1"},
     {registered, []},
     {applications, [
         kernel,
-        stdlib
+        stdlib,
+        ranch,
+        cowboy,
+        lhttpc
       ]},
     {mod, { ehrpc_app, []}},
     {env, []}
