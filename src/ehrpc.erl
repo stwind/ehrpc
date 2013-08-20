@@ -10,6 +10,8 @@ call(Service, Mod, Fun, Args, Timeout) ->
     Body = ehrpc_proto:encode(ehrpc_proto:call(Mod, Fun, Args)),
     Url = url(Service),
     case catch lhttpc:request(Url ++ "/call", post, [], Body, Timeout) of
+        {'EXIT', {econnrefused, _}} ->
+            {error, {system_busy, Url}};
         {'EXIT', Error} ->
             {error, {Url, Error}};
         {ok, {{200, _}, _, RespBody}} ->
