@@ -63,7 +63,7 @@ err_body(Reason, Req) ->
     cowboy_req:set_resp_body(Body, Req).
 
 reply(RpcReq, Req) ->
-    Body = ehrpc_req:resp(RpcReq),
+    Body = ehrpc_proto:encode(ehrpc_req:resp(RpcReq)),
     cowboy_req:set_resp_body(Body, Req).
 
 run_middlewares(Req, [Mod | Rest]) ->

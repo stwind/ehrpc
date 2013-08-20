@@ -28,7 +28,7 @@ mfa(#req{mfa = {M, F, A}, type = Type}) ->
 
 reply(Reply, Req) ->
     Req1 = set_meta(end_time, os:timestamp(), Req),
-    Req1#req{resp = ehrpc_proto:encode(Reply)}.
+    Req1#req{resp = Reply}.
 
 meta(Key, Req) ->
     meta(Key, Req, undefined).
