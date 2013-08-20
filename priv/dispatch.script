@@ -3,7 +3,7 @@
 
 [
   {'_', [
-      {"/ping/[...]", ehrpc_cb_ping, []},
+      %{"/ping/[...]", ehrpc_cb_ping, []},
       {"/call/[...]", ehrpc_cb_call, []}
     ]}
 ].

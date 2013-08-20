@@ -71,7 +71,6 @@ new_client(Name) ->
 
 ehrpc_env(Node, server) ->
     call(Node, application, set_env, [ehrpc, server, [
-                {dispatch_file, "../priv/dispatch.script"},
                 {host, "127.0.0.1"},
                 {port, 5566},
                 {middlewares, [ehrpc_mfa]},

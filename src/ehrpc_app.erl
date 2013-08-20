@@ -43,10 +43,19 @@ trans_opts() ->
 
 proto_opts() ->
     DispatchFile = ehrpc_util:get_env({server, dispatch_file}, "priv/dispatch.script"),
-    {ok, Dispatch} = file:script(DispatchFile, bs()),
+    {ok, Dispatch} = file:script(filename:join(lib_dir(), DispatchFile), bs()),
     [{env, [{dispatch, cowboy_router:compile(Dispatch)}]}].
 
 bs() ->
     lists:foldl(fun({K,V}, Bs) ->
                 erl_eval:add_binding(K, V, Bs)
         end, erl_eval:new_bindings(), []).
+
+lib_dir() ->
+    case code:lib_dir(ehrpc) of
+        {error, bad_name} ->
+            {ok, Dir} = file:get_cwd(),
+            Dir;
+        Dir ->
+            Dir
+    end.
