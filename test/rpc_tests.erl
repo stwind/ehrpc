@@ -80,7 +80,7 @@ ehrpc_env(Node, client) ->
     call(Node, application, set_env, [ehrpc, client, [
                 {services, [
                         {p1, [
-                                {url, "http://localhost:5566"}
+                                {url, ["http://localhost:5566"]}
                             ]}
                     ]}
             ]]).

@@ -35,27 +35,19 @@ setup_cowboy() ->
 trans_opts() ->
     {ok, Ip} = inet_parse:address(ehrpc_util:get_env({server, host}, "0.0.0.0")),
     [
-        {port, ehrpc_util:get_env({server, port}, 5566)},
-        {ip, Ip}, 
-        {max_connections, ehrpc_util:get_env({server, max_connections}, 1024)}, 
-        {backlog, ehrpc_util:get_env({server, backlog}, 1024)}
+     {port, ehrpc_util:get_env({server, port}, 5566)},
+     {ip, Ip}, 
+     {max_connections, ehrpc_util:get_env({server, max_connections}, 1024)}, 
+     {backlog, ehrpc_util:get_env({server, backlog}, 1024)}
     ].
 
 proto_opts() ->
-    DispatchFile = ehrpc_util:get_env({server, dispatch_file}, "priv/dispatch.script"),
-    {ok, Dispatch} = file:script(filename:join(lib_dir(), DispatchFile), bs()),
-    [{env, [{dispatch, cowboy_router:compile(Dispatch)}]}].
+    [{env, [{dispatch, cowboy_router:compile(dispatch())}]}].
 
-bs() ->
-    lists:foldl(fun({K,V}, Bs) ->
-                erl_eval:add_binding(K, V, Bs)
-        end, erl_eval:new_bindings(), []).
-
-lib_dir() ->
-    case code:lib_dir(ehrpc) of
-        {error, bad_name} ->
-            {ok, Dir} = file:get_cwd(),
-            Dir;
-        Dir ->
-            Dir
-    end.
+dispatch() ->
+    [
+     {'_', [
+            {"/ping/[...]", ehrpc_cb_ping, []},
+            {"/call/[...]", ehrpc_cb_call, []}
+           ]}
+    ].

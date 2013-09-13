@@ -32,7 +32,10 @@ call(Service, Mod, Fun, Args, Timeout) ->
 %% ===================================================================
 
 url(Service) ->
-    ehrpc_util:get_env({client, services, Service, url},"http://localhost:5566").
+    Urls = ehrpc_util:get_env({client, services, Service, url},["http://localhost:5566"]),
+    random:seed(),
+    Idx = random:uniform(length(Urls)),
+    lists:nth(Idx, Urls).
 
 reason({server, _, Type, undefined, _}) ->
     Type;
